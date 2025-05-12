@@ -15,12 +15,20 @@ class TemperatureSensor(Sensor):
         if self.last_value is None:     # Pierwsze przypisanie wartośći temperatury
             value = np.random.uniform(self.min_value + 5, self.max_value - 5)
         else:
-            zmiennosc = np.random.uniform(-5,5)     # Wysolosanie zmienności imitującej naturalne wahania temperatury
+            zmiennosc = np.random.uniform(-5,5)     # Wylosowanie zmienności imitującej naturalne wahania temperatury
             value = self.last_value + zmiennosc     # Obliczanie końcowej temperatury
             value = max(self.min_value, min(self.max_value, value)) # # Sprawdzenie czy nowa wartość mieści się w zalooznych granicach
 
-        self.last_value = value
-        return value
+        self.last_value = round(value,2)    # Zaokrąglenie do 2 miejsc po przecinku
+        
+        timestamp = datetime.now()    # Pobranie aktualnej godziny pomiaru
+        for callback in self.callbacks:    # Generowanie callback'ów dla tego sensora 
+            try:
+                callback(self.sensor_id, timestamp, self.last_value, self.unit)    # Callback pobiera dane z czujnika i przekazuje go do funkcji register_callback 
+            except Exception as e:
+                print(f"Blad w callbacku {callback.__name__} dla {self.sensor_id}: {str(e)}")    # W przypadku błędu zwraca tresc bledu
+
+        return self.last_value
 
 # == Czujnik Wilgotności ==
 class HumiditySensor(Sensor):
@@ -61,7 +69,15 @@ class HumiditySensor(Sensor):
                     value += np.random.uniform(-1, 1)
 
         value = max(self.min_value, min(self.max_value, value)) # Sprawdzenie czy nowa wartość mieści się w zalooznych granicach
-        self.last_value = round(value,2)    # Zaokrąglenie wyniku do dwóch liczb po przecinku
+        self.last_value = round(value,2)    # Zaokrąglenie wyniku do dwóch miejsc po przecinku
+        
+        timestamp = datetime.now()    # Pobranie aktualnej godziny pomiaru
+        for callback in self.callbacks:    # Generowanie callback'ów dla tego sensora 
+            try:
+                callback(self.sensor_id, timestamp, self.last_value, self.unit)    # Callback pobiera dane z czujnika i przekazuje go do funkcji register_callback 
+            except Exception as e:
+                print(f"Blad w callbacku {callback.__name__} dla {self.sensor_id}: {str(e)}")    # W przypadku błędu zwraca tresc bledu
+
         return self.last_value
 
 # == Czujnik Ciśnienia ==
@@ -81,8 +97,16 @@ class PressureSensor(Sensor):
 
         value = self.base_value + zmiennosc     # Obliczanie końcowej wartości ciśnienia
         value = max(self.min_value, min(self.max_value, value))
-        self.last_value = value
-        return value
+        self.last_value = round(value,2)    # Zaokrąglenie do 2 miejsc po przecinku
+        
+        timestamp = datetime.now()    # Pobranie aktualnej godziny pomiaru
+        for callback in self.callbacks:    # Generowanie callback'ów dla tego sensora 
+            try:
+                callback(self.sensor_id, timestamp, self.last_value, self.unit)    # Callback pobiera dane z czujnika i przekazuje go do funkcji register_callback 
+            except Exception as e:
+                print(f"Blad w callbacku {callback.__name__} dla {self.sensor_id}: {str(e)}")    # W przypadku błędu zwraca tresc bledu
+
+        return self.last_value
 
 # == Czujnik zanieczyszczenia ==
 class AirQualitySensor(Sensor):
@@ -102,8 +126,6 @@ class AirQualitySensor(Sensor):
         else:   #   Poza godzinami szczytu poziom AQI stopniowo spada
             zmiennosc = np.random.uniform(-5,-10)
             value = self.base_value + zmiennosc
-
-
 
         if self.humidity_sensor and self.humidity_sensor.current_enviroment is not None:
             if self.humidity_sensor.current_enviroment <= 0.2:  # Sprawdzamy czy jest deszcz (enviroment <= 0.2)
@@ -125,8 +147,16 @@ class AirQualitySensor(Sensor):
             value += zmiennosc
 
         value = max(self.min_value, min(self.max_value, value))
-        self.last_value = value
-        return value
+        self.last_value = round(value,2)    # Zaokrąglanie do 2 miejsc po przecinku
+        
+        timestamp = datetime.now()    # Pobranie aktualnej godziny pomiaru
+        for callback in self.callbacks:    # Generowanie callback'ów dla tego sensora 
+            try:
+                callback(self.sensor_id, timestamp, self.last_value, self.unit)    # Callback pobiera dane z czujnika i przekazuje go do funkcji register_callback 
+            except Exception as e:
+                print(f"Blad w callbacku {callback.__name__} dla {self.sensor_id}: {str(e)}")    # W przypadku błędu zwraca tresc bledu
+
+        return self.last_value
 
     def get_air_quality_level(self):    # Funkcja zajmująca się oceną jakości powietrza
         if self.last_value is None:
