@@ -1,4 +1,4 @@
-
+import datetime
 import random
 import time
 
@@ -22,6 +22,10 @@ class Sensor:
         self.frequency = frequency
         self.active = True
         self.last_value = None
+        self.callback =[]
+
+    def register_callback(self, callback):    # Rejestracja funkcji do wywołania po każdym odczycie z sensora
+        self.callbacks.append(callback)
 
     def read_value(self):
         """
